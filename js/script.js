@@ -29,14 +29,17 @@ Al termine della partita il software deve comunicare il punteggio, cioè il nume
 
 const container = document.querySelector('.container');
 let sqPerRow;
-
 const BOMB_NUMBER = 16;
 let bombs = [];
+let score = 0;
+let closureMessage;
 
 document.getElementById('start').addEventListener('click', function(){
   sqPerRow = document.getElementById('level').value;
   console.log(sqPerRow);
   container.innerHTML = '';
+  document.querySelector('.end-message').innerHTML = '';
+  score = 0;
   init (sqPerRow);
 })
 
@@ -75,10 +78,10 @@ function addBombs (totalSquares){
     addedBombs.push(bomb);
     }
   }
-
   return addedBombs;
-}
 
+}
+//funzione per generare num random
 function getRandomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -87,5 +90,46 @@ function clickedSq() {
   console.log(this.customSq);
   //this.innerHTML = this.customSq;
   this.classList.add('aquamarine');
+  //se invece prendo una bomba, cioè l'ID della customDq è nell'array bombs
+  if(!bombs.includes(this.customSq)){
+    //aggiungo la classe clicked a this
+    this.classList.add('clicked');
+    //aggiungo al contatore i tentativi
+    score++;
+    console.log(score,'punteggio cumulato');
+    //se il punteggio è uguale al numero di squares - il numero di bombs si vince, sennò si perde
+    if(score === Math.pow(sqPerRow, 2) - BOMB_NUMBER){
+      gameOver (true);
+    }
+  } else{
+    gameOver (false);
+  } 
+}
 
+function gameOver(isWin){
+  //messaggio in footer di chiusura e riepilogo
+  if(isWin){
+    closureMessage = `HAI VINTO'ottenendo ${score} punti su ${Math.pow(sqPerRow, 2) - BOMB_NUMBER}`;
+    console.log('HAI VINTO, ');
+  } else {
+    closureMessage = `HAI PERSO, ed ottenuto ${score} punti su ${Math.pow(sqPerRow, 2) - BOMB_NUMBER}`;
+    console.log('GAME OVER');
+  }
+  document.querySelector('.end-message').innerHTML = closureMessage;
+  showbombs ();
+  //creo overlayer che al game-over non permette di toccare la griglia
+  const overlayer = document.createElement('div');
+  overlayer.className = 'game-overlayer';
+  document.querySelector('.container').append(overlayer);
+}
+
+function showbombs() {
+    const square = document.getElementsByClassName('square');
+    for(let i = 0; i < square.length; i++){
+        const checkBomb = square[i];
+        console.log(checkBomb,'checkbomb');
+        if(bombs.includes(checkBomb.customSq)){
+          square[i].classList.add('bomb');
+        }
+    }
 }
